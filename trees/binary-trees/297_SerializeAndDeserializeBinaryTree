@@ -1,0 +1,89 @@
+//The code might not execute when u click the Run button..there is some internal LC problem...but when youll try to submit it will work
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+ /*
+ * LC 297: Serialize and Deserialize Binary Tree
+ * Goal: convert a tree to a string (serialize) and rebuild the EXACT same tree
+ *       back from that string (deserialize).
+ *
+ * KEY INSIGHT:
+ * A plain preorder traversal alone is NOT enough to rebuild a tree uniquely
+ * (that's why LC 105 needed a second array like inorder). BUT if we explicitly
+ * record every null child as a marker (e.g. "N"), a single preorder traversal
+ * becomes fully unambiguous -> we always know exactly when a subtree ends.
+ *
+ * SERIALIZE (preorder: root, left, right):
+ * - if node is null -> append "N," and RETURN (don't fall through!)
+ * - else -> append node.val + ",", then recurse left, then recurse right
+ *
+ * DESERIALIZE:
+ * - split the string by "," and load tokens into a Queue<String>
+ *   (queue type must be String here, NOT TreeNode -> we build TreeNodes
+ *    one at a time as we consume tokens, we don't start with TreeNodes)
+ * - poll next token:
+ *     - if "N" -> return null (this is what stops the recursion)
+ *     - else -> create new TreeNode, then:
+ *         node.left  = deserial(queue)   // build left first
+ *         node.right = deserial(queue)   // then right
+ *         (matches the exact order values were written during serialize)
+ *
+ * COMMON BUGS TO WATCH FOR:
+ * 1. Forgetting `return;` after appending "N," in serialize -> falls through
+ *    to node.val on a null node -> NullPointerException
+ * 2. Mismatched generic types: queue must be Queue<String> everywhere
+ *    (both in deserialize() AND in deserial()'s parameter) since we're
+ *    consuming raw string tokens, only converting to TreeNode when needed
+ *
+ * Time: O(n) for both serialize and deserialize
+ * Space: O(n) for the string/queue + O(h) recursion stack
+ */
+public class Codec {
+
+    // Encodes a tree to a single string.
+    public String serialize(TreeNode root) {
+        StringBuilder sb = new StringBuilder();
+        serial(root,sb);
+        return sb.toString();
+    }
+    public void serial(TreeNode node,StringBuilder sb)
+    {
+        if(node==null)
+        {
+            sb.append("N,");
+            return;
+        }
+        sb.append(node.val).append(",");
+        serial(node.left,sb);
+        serial(node.right,sb);
+    }
+
+    // Decodes your encoded data to tree.
+    public TreeNode deserialize(String data) {
+        Queue<String> q = new LinkedList<>(Arrays.asList(data.split(",")));
+        return deserial(q);
+    }
+    public TreeNode deserial(Queue<String>q)
+    {
+        String val = q.poll();
+        if(val.equals("N"))
+        {
+            return null;
+        }
+        TreeNode node = new TreeNode(Integer.parseInt(val));
+        node.left = deserial(q);
+        node.right = deserial(q);
+        return node;
+    }
+}
+
+// Your Codec object will be instantiated and called as such:
+// Codec ser = new Codec();
+// Codec deser = new Codec();
+// TreeNode ans = deser.deserialize(ser.serialize(root));
