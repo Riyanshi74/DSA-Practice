@@ -4,8 +4,10 @@
 // remove both, you can only ever remove from the front or the back of the
 // array (one element at a time). So there are exactly 3 possible strategies:
 // 1) Remove everything up to and including the later of the two indices from
-//    the front, 2) Remove everything from the earlier index to the end from
-//    the back, 3) Remove one from the front (up to the earlier index) and
+//    the front,
+//  2) Remove everything from the earlier index to the end from
+//    the back, 
+// 3) Remove one from the front (up to the earlier index) and
 //    the rest from the back (from the later index onward). Take the min of
 //    all 3 options.
 // Time: O(n), Space: O(1)
